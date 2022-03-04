@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- 这里修改自己的mapper -->
+<mapper namespace="org.demo.mapper.DynamicSQLMapper">
+
+    <!-- 查询员工，要求，携带了哪个字段查询条件就带上这个字段的值 -->
+    <!-- public List<Employee> getEmpsByConditionIf(Employee employee); -->
+    <select id="getEmpsByConditionIf" resultType="org.demo.po.Employee">
+        select * from employee where 1=1
+        <!-- test：判断表达式（OGNL）
+        OGNL参照PPT或者官方文档。
+             c:if  test
+        从参数中取值进行判断
+        遇见特殊符号应该去写转义字符：
+        &&：
+        -->
+        <if test="id!=null">
+            and id=#{id}
+        </if>
+        <if test="lastName!=null &amp;&amp; lastName!=&quot;&quot;">
+            and last_name like #{lastName}
+        </if>
+        <if test="email!=null and email.trim()!=&quot;&quot;">
+            and email=#{email}
+        </if>
+        <!-- ognl会进行字符串与数字的转换判断  "0"==0 -->
+        <if test="gender==0 or gender==1">
+            and gender=#{gender}
+        </if>
+    </select>
+    <!--
+    查询的时候如果某些条件没带可能sql拼装会有问题
+    1. 给where后面加上1=1，以后的条件都and xxx。
+    2. mybatis使用where标签来将所有的查询条件包括在内。mybatis就会将where标签中拼装的sql，
+    多出来的and或者or去掉（where只会去掉第一个多出来的and或者or，但最后一个多出来的and或者or则不会去掉）。
+      -->
+    <select id="getEmpsByConditionIfWithWhere" resultType="org.demo.po.Employee">
+        select * from employee
+        <where>
+            <if test="id!=null">
+                id=#{id}
+            </if>
+            <if test="lastName!=null and lastName!=&quot;&quot;">
+                and last_name like #{lastName}
+            </if>
+            <if test="email!=null and email.trim()!=&quot;&quot;">
+                and email=#{email}
+            </if>
+            <!-- ognl会进行字符串与数字的转换判断  "0"==0 -->
+            <if test="gender==0 or gender==1">
+                and gender=#{gender}
+            </if>
+        </where>
+    </select>
+
+    <!--Integer updateEmp(Employee employee);-->
+    <update id="updateEmp">
+        <!-- Set标签的使用 -->
+        update employee
+        <set>
+            <if test="lastName!=null">
+                last_name=#{lastName},
+            </if>
+            <if test="email!=null">
+                email=#{email},
+            </if>
+            <if test="gender!=null">
+                gender=#{gender}
+            </if>
+        </set>
+        where id=#{id}
+        <!--
+          Trim：更新拼串
+          update employee
+          <trim prefix="set" suffixOverrides=",">
+            <if test="lastName!=null">
+              last_name=#{lastName},
+            </if>
+            <if test="email!=null">
+              email=#{email},
+            </if>
+            <if test="gender!=null">
+              gender=#{gender}
+            </if>
+          </trim>
+          where id=#{id}  -->
+    </update>
+
+    <!--public List<Employee> getEmpsByConditionTrim(Employee employee);  -->
+    <select id="getEmpsByConditionTrim" resultType="org.demo.po.Employee">
+        select * from employee
+        <!-- 自定义字符串的截取规则 -->
+        <trim prefix="where" suffixOverrides="and">
+            <if test="id!=null">
+                id=#{id} and
+            </if>
+            <if test="lastName!=null &amp;&amp; lastName!=&quot;&quot;">
+                last_name like #{lastName} and
+            </if>
+            <if test="email!=null and email.trim()!=&quot;&quot;">
+                email=#{email} and
+            </if>
+            <!-- ognl会进行字符串与数字的转换判断  "0"==0
+             最后的and会自动剪裁-->
+            <if test="gender==0 or gender==1">
+                gender=#{gender} and
+            </if>
+        </trim>
+    </select>
+
+
+
+
+    <!-- public List<Employee> getEmpsByConditionChoose(Employee employee); -->
+    <select id="getEmpsByConditionChoose" resultType="org.demo.po.Employee">
+        select * from employee
+        <where>
+            <!-- 如果带了id就用id查，如果带了lastName就用lastName查;只会进入其中一个 -->
+            <choose>
+                <when test="id!=null">
+                    id=#{id}
+                </when>
+                <when test="lastName!=null">
+                    last_name like #{lastName}
+                </when>
+                <when test="email!=null">
+                    email = #{email}
+                </when>
+                <otherwise>
+                    gender = 0
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+
+    <!--public List<Employee> getEmpsByConditionForeach(List<Integer> ids);  -->
+    <select id="getEmpsByConditionForeach" resultType="org.demo.po.Employee">
+        select * from employee
+        <foreach collection="ids" item="item_id" separator=","
+                 open="where id in(" close=")">
+            #{item_id}
+        </foreach>
+    </select>
+
+
+
+    <!--List<Employee> selectEmp(Map map)
+    map的结构是{"list",list},list里是id
+    -->
+    <select id="selectEmp" parameterType="map" resultType="org.demo.po.Employee">
+        select * from employee
+        <where>
+            <foreach collection="list" item="id" open="(" separator="or" close=")">
+                id = #{id}
+            </foreach>
+        </where>
+    </select>
+
+    <!--List<Employee> selectEmp1(Map map)
+    map的结构是{"list",list},list里是id
+    -->
+    <select id="selectEmp1" parameterType="map" resultType="org.demo.po.Employee">
+        select * from employee
+        <where>
+            id in
+            <foreach collection="list" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+
+    <!-- 批量保存 -->
+    <!--public void addEmps(@Param("emps")List<Employee> emps);  -->
+    <!--MySQL下批量保存：可以foreach遍历   mysql支持values(),(),()语法-->
+    <insert id="addEmps">
+        insert into employee(last_name,email,gender,did)
+        values
+        <foreach collection="emps" item="emp" separator=",">
+            (#{emp.lastName},#{emp.email},#{emp.gender},#{emp.department.id})
+        </foreach>
+    </insert><!--   -->
+
+    <!-- 这种方式需要数据库连接属性allowMultiQueries=true；
+      这种分号分隔多个sql可以用于其他的批量操作（删除，修改） -->
+    <insert id="addEmps2">
+        <foreach collection="emps" item="emp" separator=";">
+            insert into employee(last_name,email,gender,did)
+            values(#{emp.lastName},#{emp.email},#{emp.gender},#{emp.department.id})
+        </foreach>
+    </insert>
+
+
+
+
+    <sql id="employColumns">${alias}.id,${alias}.last_name,${alias}.gender,${alias}.email </sql>
+
+    <select id="selectEmployeeBySql" resultType="org.demo.po.Employee">
+        select
+        <include refid="employColumns"><property name="alias" value="t1"/></include>
+        from employee t1
+    </select>
+
+    <sql id="insertColumn">
+        <if test="_databaseId=='oracle'">
+            last_name,email,gender,did
+        </if>
+        <if test="_databaseId=='mysql'">
+            last_name,email,gender,did
+        </if>
+    </sql>
+
+
+    <insert id="addEmps3">
+        insert into employee(
+        <include refid="insertColumn"></include><!-- 使用地方 -->
+        )
+        values
+        <foreach collection="emps" item="emp" separator=",">
+            (#{emp.lastName},#{emp.email},#{emp.gender},#{emp.department.id})
+        </foreach>
+    </insert>
+</mapper>

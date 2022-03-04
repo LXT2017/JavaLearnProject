@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- 这里修改自己的mapper -->
+<mapper namespace="org.demo.mapper.DepartmentMapper">
+
+    <!--嵌套结果集的方式，使用collection标签定义关联的集合类型的属性封装规则  -->
+    <resultMap type="org.demo.po.Department" id="MyDeptWithEmps">
+        <id column="id" property="id"/>
+        <result column="department_name" property="departmentName"/>
+        <!--
+          collection定义关联集合类型的属性的封装规则
+          ofType:指定集合里面元素的类型
+        -->
+        <collection property="emps" ofType="org.demo.po.Employee" javaType="java.util.List">
+            <!-- 定义这个集合中元素的封装规则 -->
+            <id column="e_id" property="id"/>
+            <result column="last_name" property="lastName"/>
+            <result column="email" property="email"/>
+            <result column="gender" property="gender"/>
+        </collection>
+    </resultMap>
+
+    <!-- collection：分段查询 -->
+    <resultMap type="org.demo.po.Department" id="MyDeptStep">
+        <id column="id" property="id"/>
+        <id column="department_name" property="departmentName"/>
+        <!--多列传值column="{key1=column1,key2=column2}"-->
+        <collection property="emps"
+                    select="getEmpByDid"
+                    column="id">
+        </collection>
+    </resultMap>
+
+
+    <!-- public Department getDeptByIdPlus(Integer id); -->
+    <!--这里因为两个id重名了，Mybatis无法分辨，所以需要重命名一下-->
+    <select id="MyDept" resultMap="MyDeptWithEmps">
+        SELECT d.*, e.*,e.id as e_id
+        FROM department d LEFT JOIN employee e ON d.id=e.did
+        WHERE d.id=#{id}
+    </select>
+
+
+
+    <select id="getDeptStep" resultMap="MyDeptStep">
+        select * from department
+        where id = #{id}
+    </select>
+
+    <select id="getEmpByDid" resultType="org.demo.po.Employee">
+        select * from employee where did = #{id}
+    </select>
+</mapper>

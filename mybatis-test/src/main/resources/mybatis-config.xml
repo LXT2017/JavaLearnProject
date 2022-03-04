@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <properties resource="db.properties"/>
+    <settings>
+        <!-- 使用驼峰命名法 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- 开启日志-->
+        <setting name="logImpl" value="STDOUT_LOGGING" />
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+    <typeAliases>
+        <!--别名设置，默认是包名，当然也可以每个路径名做一个别名映射 -->
+        <package name="org.demo.po"/>
+    </typeAliases>
+
+    <plugins>
+        <plugin interceptor="org.demo.plugin.ExamplePlugin">
+            <property name="number" value="1"/>
+        </plugin>
+    </plugins>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC" />
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}" />
+                <property name="url" value="${jdbc.url}" />
+                <property name="username" value="${jdbc.username}" />
+                <property name="password" value="${jdbc.password}" />
+            </dataSource>
+        </environment>
+    </environments>
+
+    <!-- 将我们写好的sql映射文件（EmployeeMapper.xml）一定要注册到全局配置文件（mybatis-config.xml）中 -->
+    <mappers>
+        <!-- 通过配置文件路径 -->
+        <mapper resource="mappers/EmployeeMapper.xml" />
+        <mapper resource="mappers/DepartmentMapper.xml" />
+        <mapper resource="mappers/EmployeeMapper1.xml" />
+        <mapper resource="mappers/DynamicSQLMapper.xml" />
+
+        <!-- 通过Java全限定类名 -->
+<!--        <mapper class="org.demo.mapper.EmployeeMapper"/>-->
+        <!-- 通过url 通常是mapper不在本地时用 -->
+<!--        <mapper url=""/>-->
+        <!-- 通过包名 -->
+<!--        <package name="org/demo/mapper"/>-->
+    </mappers>
+
+</configuration>
+

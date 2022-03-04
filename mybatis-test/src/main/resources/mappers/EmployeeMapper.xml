@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+
+<!-- 这里修改自己的mapper -->
+<mapper namespace="org.demo.mapper.EmployeeMapper">
+
+    <!-- 联合查询：级联属性封装结果集-->
+    <resultMap id="MyEmployee" type="org.demo.po.Employee">
+        <id column="id" property="id"/>
+        <result column="last_name" property="lastName"/>
+        <result column="gender" property="gender"/>
+        <result column="id" property="department.id"/>
+        <result column="department_name" property="department.departmentName"/>
+    </resultMap>
+
+    <!--  association可以指定联合的javaBean对象 -->
+    <resultMap id="MyEmployee1" type="org.demo.po.Employee">
+        <result column="id" property="id"/>
+        <result column="last_name" property="lastName"/>
+        <result column="gender" property="gender"/>
+        <result column="email" property="email"/>
+        <!--  association可以指定联合的javaBean对象
+        property="department"：指定哪个属性是联合的对象
+        javaType:指定这个属性对象的类型[不能省略]
+        -->
+        <association property="department" javaType="Department">
+            <id column="id" property="id"/>
+            <result column="department_name" property="departmentName"/>
+        </association>
+    </resultMap>
+
+    <!-- association分步查询  -->
+    <!-- 使用association进行分步查询：
+      1、先按照员工id查询员工信息
+      2、根据查询员工信息中的did值去部门表查出部门信息
+      3、部门设置到员工中；
+     -->
+    <resultMap id="MyEmployee2" type="org.demo.po.Employee">
+        <result column="id" property="id"/>
+        <result column="last_name" property="lastName"/>
+        <result column="gender" property="gender"/>
+        <result column="email" property="email"/>
+        <!-- association定义关联对象的封装规则
+           select:表明当前属性是调用select指定的方法查出的结果
+           column:指定将哪一列的值传给这个方法
+           流程：使用select指定的方法（传入column指定的这列参数的值）查出对象，并封装给property指定的属性
+        -->
+        <association column="did" property="department" javaType="Department" select="getDepart">
+            <id column="id" property="id"/>
+            <result column="department_name" property="departmentName"/>
+        </association>
+    </resultMap>
+
+    <!--  public Employee getEmpAndDept(Integer id);-->
+    <select id="getEmpAndDepart" resultMap="MyEmployee">
+        SELECT *
+        FROM employee e, department d
+        WHERE e.did=d.id AND e.id=#{id}
+    </select>
+
+
+    <select id="getEmpAndDepart1" resultMap="MyEmployee">
+        select * from employee e, department d WHERE e.did =d.id
+    </select>
+
+    <select id="getEmpAndDepart2" resultMap="MyEmployee">
+        select * from employee
+    </select>
+
+    <select id="getDepart" resultType="Department">
+        select * from department where id = #{did}
+    </select>
+
+</mapper>
