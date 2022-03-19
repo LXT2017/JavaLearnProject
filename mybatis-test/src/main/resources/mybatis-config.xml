@@ -18,6 +18,7 @@
     </typeAliases>
 
     <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor"></plugin>
         <plugin interceptor="org.demo.plugin.ExamplePlugin">
             <property name="number" value="1"/>
         </plugin>

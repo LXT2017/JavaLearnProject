@@ -75,4 +75,11 @@
         select * from department where id = #{did}
     </select>
 
+    <!--FORWORD_ONLY 结果集的游标只能向下滚动-->
+    <!--SCROLL_INSENSITIVE 结果集的游标可以上下移动，当数据库变化时，当前结果集不变-->
+    <!--SCROLL_SENSITIVE 返回可滚动的结果集，当数据库变化时，当前结果集同步改变-->
+    <!--fetchSize MySQL驱动需要这个数字来明确开启流处理方式-->
+    <select id="getEmpList" resultType="Employee" resultSetType="FORWARD_ONLY" fetchSize="-2147483648">
+        select * from employee
+    </select>
 </mapper>
