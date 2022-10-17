@@ -1,0 +1,32 @@
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/test?serverTimezone=GMT%2B8&autoReconnect=true&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: root
+    driverClassName: com.mysql.cj.jdbc.Driver
+  thymeleaf:
+    cache: false
+
+  servlet:
+    multipart:
+      max-file-size: -1
+      max-request-size: -1
+  mvc:
+    static-path-pattern: /**
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: always
+
+
+file:
+  save-path: F:/file/
+  temp: F:/file/temp/
+  segment: 2*1024*1024
+  max-file-size: 500
+
+
+logging:
+  level:
+    root: INFO
