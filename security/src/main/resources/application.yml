@@ -1,0 +1,70 @@
+
+# 关闭 thymeleaf 缓存
+spring:
+  thymeleaf:
+    cache: false
+#  这是什么配置文件都不设置的默认登录账号密码，如果不配置就是由SpringSecurity进行自动生成(注意控制台)
+#  security:
+#    user:
+#      name: admin
+#      password: 123456
+
+  # 循环依赖问题
+  main:
+    allow-circular-references: true
+
+# 配置数据库连接的基本信息
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/security?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: root
+
+  # Redis 服务器地址
+  redis:
+    host: localhost
+    # Redis 服务器连接端口
+    port: 6379
+    # Redis 服务器连接密码（默认无）
+    password:
+    # Redis数据库索引（默认为0）
+    database: 1
+
+    lettuce:
+      pool:
+        # 连接池最大连接数（使用负值表示没有限制），默认 8
+        max-active: 100
+        # 连接池大阻塞等待时间（使用负值表示没有限制），默认 -1
+        max-wait: PT10S
+        # 连接池中的大空闲连接 默认 8
+        max-idle: 10
+        # 连接池中的小空闲连接 默认 0
+        min-idle: 1
+    # 连接超时时间
+    timeout: PT10S
+
+  # 使用 Redis 存储 Session，默认为 none（使用内存存储）
+  session:
+    store-type: redis
+
+
+server:
+  servlet:
+    # session 失效时间，单位是秒，默认为 30min
+    # Session 的失效时间至少要 1 分钟，少于 1 分钟按照 1 分钟配置
+    session:
+      timeout: 30m
+      # JSESSIONID (Cookie)的生命周期，单位是秒，默认为 -1
+      cookie:
+        max-age: -1
+        # 指定存储 SessionId 的 Cookie 名（使用 Redis 存储 Session 后，Cookie 名默认会变为 SESSION）
+        name: JSESSIONID
+
+# 开启自动驼峰命名规则(camel case)映射
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+# 配置 Mapper 映射文件位置
+  mapper-locations: classpath*:/mapper/*.xml
+# 别名包扫描路径，通过该属性可以给指定包中的类注册别名
+  type-aliases-package: com.example.pojo

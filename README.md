@@ -8,3 +8,4 @@ java后端项目练手:kissing_closed_eyes:
 - [x] Mybatis测试
 - [x] 支付宝支付demo
 - [x] 大文件分片/断电续传
+- [x] Spring Security的demo 
