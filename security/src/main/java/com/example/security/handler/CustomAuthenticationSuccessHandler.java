@@ -42,7 +42,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             // 这里可以进行用户信息的操作
             // 认证成功，响应 JSON 数据
             response.setContentType("application/json;charset=utf-8");
-            response.getWriter().write(objectMapper.writeValueAsString(Msg.success(200,"用户认证成功").add("data",map)));
+            response.getWriter().write(objectMapper.writeValueAsString(Msg.success(200,"用户认证成功").add("data","成功")));
         }else {
             // 以下配置等同于前文中的 defaultSuccessUrl("/index")
 
