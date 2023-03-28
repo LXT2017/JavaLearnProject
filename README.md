@@ -9,3 +9,4 @@ java后端项目练手:kissing_closed_eyes:
 - [x] 支付宝支付demo
 - [x] 大文件分片/断电续传
 - [x] Spring Security的demo 
+- [x] 知识星球整合chatgpt(demo，仅供学习)
